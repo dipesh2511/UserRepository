@@ -3,6 +3,7 @@ import {
   checkHash,
   jwtSign,
   jwtTokenSign,
+  jwtVerify,
 } from "../../utility/common.utitlity.functions.js";
 import GenericErrorHandler from "../../utility/generic.error.handler.js";
 import GenericResponseHandler from "../../utility/generic.response.handle.js";
@@ -77,15 +78,17 @@ export default class UserController {
         new GenericErrorHandler("Password is required", 400, "Bad req", null)
       );
     }
-    let [error, email] = await tc(jwtSign(token));
-
-    if (error || !email) {
+    let [error, data] = await tc(jwtVerify(token));
+    if (error || !data) {
       return next(
         new GenericErrorHandler("Token is invalid", 401, "Unauthorized", null)
       );
     }
-    let [userError, userData] = await tc(this.userRepository.checkUserExist(email));
     
+    let [userError, userData] = await tc(
+      this.userRepository.checkUserExist(data.email)
+    );
+
     if (userError || userData instanceof GenericErrorHandler) {
       return next(
         new GenericErrorHandler("User not found", 404, "Not found", null)
@@ -94,20 +97,30 @@ export default class UserController {
     let new_password = await applySalt(password);
 
     let [updateError, updateData] = await tc(
-      this.userRepository.updatePassword(email, new_password)
+      this.userRepository.updatePassword(data.email, new_password)
     );
 
     if (updateError || updateData instanceof GenericErrorHandler) {
       return next(
-        new GenericErrorHandler("Password not updated", 500, "Internal server error", null)
+        new GenericErrorHandler(
+          "Password not updated",
+          500,
+          "Internal server error",
+          null
+        )
       );
     }
     res
       .status(200)
-      .send(new GenericResponseHandler("Password updated successfully", 200, "UPDATE", null));
+      .send(
+        new GenericResponseHandler(
+          "Password updated successfully",
+          200,
+          "UPDATE",
+          null
+        )
+      );
   }
-
-
 
   // use for get user details whos logged in
   async get(req, res, next) {
