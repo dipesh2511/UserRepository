@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "CODE for tommorow",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

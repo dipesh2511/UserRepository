@@ -1,0 +1,33 @@
+meta {
+  name: register use
+  type: http
+  seq: 2
+}
+
+post {
+  url: localhost:3000/api/users/register
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+      "firstName": "dipesh",
+      "lastName": "pohanekar",
+      "email": "bdbbdfjb@gmail.com",
+      "password":"12345"
+  }
+}
+
+tests {
+  test("Successful POST request", function () {
+      expect(res.getStatus()).to.be.oneOf([200, 201]);
+  });
+  
+}
+
+docs {
+  This is a POST request, submitting data to an API via the request body. This request submits JSON data, and the data is reflected in the response.
+  
+  A successful POST request typically returns a `200 OK` or `201 Created` response code.
+}

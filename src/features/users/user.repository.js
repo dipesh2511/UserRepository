@@ -8,14 +8,26 @@ export default class UserRepository {
     this.userModel = mongoose.model("users", UserSchema);
   }
 
-  async checkUserExist(email) {
-    let [error, data] = await tc(this.userModel.findOne({ email: email }));
+  async updateToken(email, token) {
+    let [error, data] = await tc(
+      this.userModel.findOneAndUpdate(
+        { email: email },
+        { resetPasswordToken: token },
+        { new: true }
+      )
+    );
     if (error || !data) {
       return new GenericErrorHandler("User not found", 404, "Not found", null);
     }
-    return true;
+    return data;
   }
-
+  async checkUserExist(email) {
+    let [error, data] = await tc(this.userModel.findOne({ email: email }).select("+resetPasswordToken"));
+    if (error || !data) {
+      return new GenericErrorHandler("User not found", 404, "Not found", null);
+    }
+    return data;
+  }
   async updatePassword(email, password) {
     let [error, data] = await tc(
       this.userModel.findOneAndUpdate(
@@ -35,7 +47,6 @@ export default class UserRepository {
     }
     return data;
   }
-
   async get(user_id) {
     let [error, data] = await tc(
       this.userModel

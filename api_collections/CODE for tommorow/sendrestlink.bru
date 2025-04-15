@@ -1,0 +1,30 @@
+meta {
+  name: sendrestlink
+  type: http
+  seq: 4
+}
+
+post {
+  url: http://localhost:3000/api/users/forgot-password
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+      "email":"dipeshpohanekar1997@gmail.com"
+  }
+}
+
+tests {
+  test("Successful DELETE request", function () {
+      expect(res.getStatus()).to.be.oneOf([200, 202, 204]);
+  });
+  
+}
+
+docs {
+  This is a DELETE request, and it is used to delete data that was previously created via a POST request. You typically identify the entity being updated by including an identifier in the URL (eg. `id=1`).
+  
+  A successful DELETE request typically returns a `200 OK`, `202 Accepted`, or `204 No Content` response code.
+}

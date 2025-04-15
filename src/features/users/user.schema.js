@@ -32,7 +32,6 @@ export const UserSchema = {
   password: {
     type: String,
     required: true,
-    minLength: 8,
     select: false,
   },
 
@@ -48,6 +47,8 @@ export const UserSchema = {
     },
     select: false,
   },
-
- 
+  resetPasswordToken:{
+    type: String,
+    select: false,
+  }
 };

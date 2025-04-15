@@ -46,7 +46,12 @@ export default class UserController {
         )
       );
     }
-
+    [error, data] = await tc(this.userRepository.updateToken(email, token));
+    if (error || data instanceof GenericErrorHandler) {
+      return next(
+        new GenericErrorHandler("User not found", 404, "Not found", null)
+      );
+    }
     return res
       .status(200)
       .send(
@@ -61,6 +66,35 @@ export default class UserController {
 
   async setNewPassword(req, res, next) {
     const token = req.params.token;
+
+    let [error, data] = await tc(jwtVerify(token));
+    if (error || !data) {
+      return next(
+        new GenericErrorHandler("Url is invalid", 404, "BAD REQUEST", null)
+      );
+    }
+
+    let [userError, userData] = await tc(
+      this.userRepository.checkUserExist(data.email)
+    );
+
+    if (userError || userData instanceof GenericErrorHandler) {
+      return next(
+        new GenericErrorHandler("User not found", 404, "Not found", null)
+      );
+    }
+
+    if (userData.resetPasswordToken != token) {
+      return next(
+        new GenericErrorHandler(
+          "Trying reset password again",
+          404,
+          "BAD REQUEST",
+          null
+        )
+      );
+    }
+    
     let new_path = path.join(
       path.resolve(),
       "src",
@@ -84,7 +118,7 @@ export default class UserController {
         new GenericErrorHandler("Token is invalid", 401, "Unauthorized", null)
       );
     }
-    
+
     let [userError, userData] = await tc(
       this.userRepository.checkUserExist(data.email)
     );
@@ -92,6 +126,17 @@ export default class UserController {
     if (userError || userData instanceof GenericErrorHandler) {
       return next(
         new GenericErrorHandler("User not found", 404, "Not found", null)
+      );
+    }
+    console.log("User data", userData);
+    if (userData.resetPasswordToken != token) {
+      return next(
+        new GenericErrorHandler(
+          "Trying reset password again",
+          404,
+          "BAD REQUEST",
+          null
+        )
       );
     }
     let new_password = await applySalt(password);
