@@ -69,7 +69,10 @@ export default class UserRepository {
         null
       );
     }
-    return data;
+    let userData = data.toObject();
+    delete userData.password;
+    delete userData.otp;
+    return userData;
   }
   async login(email) {
     let [error, data] = await tc(
